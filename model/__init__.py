@@ -1,6 +1,7 @@
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from .funcoes import popula_base
 import os
 
 # importando os elementos definidos no modelo
@@ -28,3 +29,14 @@ if not database_exists(engine.url):
 
 # cria as tabelas do banco, caso não existam
 Base.metadata.create_all(engine)
+
+with engine.connect() as connection:
+    if not engine.dialect.has_table(connection, "pet"):
+        print("Tabela 'pet' não existe.")
+    else:
+        session = Session()
+
+        if session.query(Pet).count() == 0:
+            print("Tabela 'pet' está vazia. Populando os dados.")
+            popula_base(session)
+

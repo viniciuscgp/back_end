@@ -1,5 +1,7 @@
 from flask_openapi3 import OpenAPI, Info, Tag
 from flask import redirect
+from flask import request, jsonify
+from sqlalchemy import func
 from pydantic import BaseModel, Field, ValidationError
 
 from sqlalchemy.exc import IntegrityError
@@ -21,7 +23,7 @@ pet_tag = Tag(name="Pet", description="Adição, visualização e remoção de p
 
 #---------- JEITO BIZZARO PARA PODER OBTER PARAMETROS DE URL :-|
 class PetPath(BaseModel):
-    pet_id: int = Field(..., description='pet id')
+    pet_id: int =  Field(..., description='pet id')
 
 
 #-----------MOSTRA A DOCUMENTAÇÃO DA API 
@@ -36,19 +38,17 @@ def home():
 def add_pet(form: PetSchema):
     """Adiciona um novo Pet à base de dados
 
-    Retorna uma representação dos produtos e comentários associados.
+    Retorna uma representação dos Pets cadastrados
     """
     pet = Pet(nome=form.nome, raca=form.raca, idade=form.idade, tutor_telefone=form.tutor_telefone, tutor_email=form.tutor_email)
 
     logger.debug(f"Adicionando pet de nome: '{pet.nome}'")
     try:
-        # criando conexão com a base
         session = Session()
-        # adicionando produto
         session.add(pet)
-        # efetivando o camando de adição de novo item na tabela
         session.commit()
-        logger.debug(f"Adicionado produto de nome: '{pet.nome}'")
+
+        logger.debug(f"Adicionado Pet de nome: '{pet.nome}'")
         return apresenta_pet(pet), 200
     
     except ValidationError as e:
@@ -117,13 +117,56 @@ def get_all_pets():
     pets = session.query(Pet).all()
 
     if not pets:
-        # se não há produtos cadastrados
+        # se não há Pets cadastrados
         return {"pets": []}, 200
     else:
         logger.debug(f"%d pets econtrados" % len(pets))
-        # retorna a representação de produto
+        # retorna a representação de Pet
         print(pets)
         return apresenta_pets(pets), 200
+    
+#-----------RETORNA TODOS OS PETS CADASTRADOS (PAGINAÇÃO)
+@app.get('/pets/pages', tags=[pet_tag], responses={"200": ListagemPetsSchema, "404": ErrorSchema})
+def get_all_pets_paging():
+    """Faz a busca por todos os Pets cadastrados com paginação
+
+    Retorna uma representação da listagem de Pets.
+    """
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+
+    logger.debug(f"Coletando Pets ")
+
+    if page < 1:
+        page = 1
+
+    if per_page < 1:
+        per_page = 10
+
+    offset = (page - 1) * per_page
+
+    session = Session()
+
+    total_pets = session.query(func.count(Pet.id)).scalar()
+
+    # Consultar os Pets com limite e deslocamento
+    pets = session.query(Pet).limit(per_page).offset(offset).all()
+
+    if not pets:
+        # Se não há Pets cadastrados
+        return jsonify({"pets": []}), 200
+    else:
+        logger.debug(f"%d pets encontrados" % len(pets))
+        # Retorna a representação de Pet e informações de paginação
+        return jsonify({
+            "total_pets": total_pets,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": math.ceil(total_pets / per_page),
+            "pets": apresenta_pets(pets),
+        }), 200
+
+
 
 #-----------RETORNA DADOS DO PET PELO ID, VER class PetPath ACIMA (bizarro)
 @app.get('/pets/<int:pet_id>', tags=[pet_tag], responses={"200": PetViewSchema, "404": ErrorSchema})        
@@ -139,13 +182,13 @@ def get_pet_id(path: PetPath):
     pet = session.query(Pet).filter(Pet.id == path.pet_id).first()
 
     if not pet:
-        # se o produto não foi encontrado
+        # se o pet não foi encontrado
         error_msg = "Pet não encontrado na base :/"
         logger.warning(f"Erro ao buscar pet '{path.pet_id}', {error_msg}")
         return {"mesage": error_msg}, 404
     else:
         logger.debug(f"pet econtrado: '{pet.nome}'")
-        # retorna a representação de produto
+        # retorna a representação do pet
         return apresenta_pet(pet), 200
 
 
@@ -168,7 +211,7 @@ def del_pet_id(path: PetPath):
         logger.debug(f"Deletado pet #{path.pet_id}")
         return {"mesage": "Pet removido", "id": path.pet_id}
     else:
-        # se o produto não foi encontrado
+        # se o  pet não foi encontrado
         error_msg = "Pet não encontrado na base :/"
         logger.warning(f"Erro ao deletar pet #'{path.pet_id}', {error_msg}")
         return {"mesage": error_msg}, 404

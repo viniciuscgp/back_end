@@ -35,3 +35,15 @@
 [2023-04-29 23:34:58,380] INFO _log() L224  127.0.0.1 - - [29/Apr/2023 23:34:58] "GET /pets HTTP/1.1" 200 - - call_trace=C:\Users\vinia\AppData\Roaming\Python\Python311\site-packages\werkzeug\_internal.py L224 
 [2023-04-29 23:35:07,440] INFO _log() L224  127.0.0.1 - - [29/Apr/2023 23:35:07] "GET /pets HTTP/1.1" 200 - - call_trace=C:\Users\vinia\AppData\Roaming\Python\Python311\site-packages\werkzeug\_internal.py L224 
 [2023-04-29 23:35:11,159] INFO _log() L224  127.0.0.1 - - [29/Apr/2023 23:35:11] "GET /pets HTTP/1.1" 200 - - call_trace=C:\Users\vinia\AppData\Roaming\Python\Python311\site-packages\werkzeug\_internal.py L224 
+[2023-04-30 10:55:20,239] INFO _log() L224   * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.103:5000 (Press CTRL+C to quit) - call_trace=C:\Users\vinia\AppData\Roaming\Python\Python311\site-packages\werkzeug\_internal.py L224 
+[2023-04-30 10:59:49,979] INFO _log() L224   * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.103:5000 (Press CTRL+C to quit) - call_trace=C:\Users\vinia\AppData\Roaming\Python\Python311\site-packages\werkzeug\_internal.py L224 
+[2023-04-30 11:00:17,441] INFO _log() L224   * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.103:5000 (Press CTRL+C to quit) - call_trace=C:\Users\vinia\AppData\Roaming\Python\Python311\site-packages\werkzeug\_internal.py L224 
