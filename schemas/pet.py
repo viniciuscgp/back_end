@@ -51,7 +51,6 @@ class PetDelSchema(BaseModel):
     mesage: str
     nome: str
 
-
 def apresenta_pets(pets: List[Pet]):
     """ Retorna uma representação do pet seguindo o schema definido em
         PetViewSchema.

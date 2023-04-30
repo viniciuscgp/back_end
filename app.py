@@ -1,6 +1,5 @@
 from flask_openapi3 import OpenAPI, Info, Tag
 from flask import redirect
-from urllib.parse import unquote
 from pydantic import BaseModel, Field, ValidationError
 
 from sqlalchemy.exc import IntegrityError
@@ -64,6 +63,46 @@ def add_pet(form: PetSchema):
         return {"mesage": error_msg}, 400
 
 
+#-----------ALTERA UM PET JÁ CASDASTRADO
+@app.put('/pets/<int:pet_id>', tags=[pet_tag], responses={"200": PetViewSchema, "404": ErrorSchema, "400": ErrorSchema})
+def update_pet(path: PetPath, form: PetSchema):
+    """Atualiza um Pet baseado em seu ID
+
+    Retorna uma representação do Pet alterado.
+    """
+    
+    session = Session()
+
+    pet = session.query(Pet).get(path.pet_id)
+
+    if not pet:
+        return {"Pet não encontrado": error_msg}, 404  
+
+    # atualizando os campos do pet com os valores do formulário
+    pet.nome = form.nome
+    pet.raca = form.raca
+    pet.idade = form.idade
+    pet.tutor_telefone = form.tutor_telefone
+    pet.tutor_email = form.tutor_email    
+
+    logger.debug(f"Alterando o pet: '{pet.nome}'")
+    try:
+        # efetivando o camando de adição de novo item na tabela
+        session.commit()
+        logger.debug(f"Atualizado o pet: '{pet.nome}'")
+        return apresenta_pet(pet), 200
+    
+    except ValidationError as e:
+        error_msg = "Erro de validação: " + str(e)
+        logger.warning(f"Erro ao atualizar pet de ID '{path.pet_id}', {error_msg}")
+        return {"message": error_msg}, 400 
+
+    except Exception as e:
+        error_msg = "Não foi possível atualizar o pet :/"
+        logger.warning(f"Erro ao atualizar o pet de ID '{path.pet_id}', {error_msg}")
+        return {"mesage": error_msg}, 400
+
+
 #-----------RETORNA TODOS OS PETS CADASTRADOS
 @app.get('/pets', tags=[pet_tag], responses={"200": ListagemPetsSchema, "404": ErrorSchema})
 def get_all_pets():
@@ -91,7 +130,7 @@ def get_all_pets():
 def get_pet_id(path: PetPath):
     """Faz a busca por um pet a partir do id
 
-    Retorna uma representação do pet encontrado.
+    Retorna uma representação JSON do pet encontrado.
     """
     logger.debug(f"Coletando dados sobre o pet #{path.pet_id}")
     # criando conexão com a base
