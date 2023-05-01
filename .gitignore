@@ -1,12 +1,25 @@
-log/gunicorn.detailed.log
-log/gunicorn.detailed.log.1
-log/gunicorn.detailed.log.2
-log/gunicorn.detailed.log.3
-log/gunicorn.detailed.log.4
-log/gunicorn.detailed.log.5
-log/gunicorn.detailed.log.6
-log/gunicorn.detailed.log.7
-log/gunicorn.detailed.log.8
-log/gunicorn.detailed.log.9
-log/gunicorn.detailed.log.10
+# Arquivos específicos do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
 database/pets.sqlite3
+# Ambientes virtuais do Python
+venv/
+*.venv
+env/
+*.env
+
+# Arquivos específicos do Flask
+instance/
+
+# Arquivos de log
+*.log
+*gunicorn.detailed.log.*
+# Outros arquivos e diretórios comuns a serem ignorados
+.DS_Store
+*.swp
+*.swo
+*~
+

@@ -1,3 +1,4 @@
+import math
 from flask_openapi3 import OpenAPI, Info, Tag
 from flask import redirect
 from flask import request, jsonify
@@ -25,6 +26,9 @@ pet_tag = Tag(name="Pet", description="Adição, visualização e remoção de p
 class PetPath(BaseModel):
     pet_id: int =  Field(..., description='pet id')
 
+class PageQuery(BaseModel):
+    page: int = Field(..., description='Número da página')
+    per_page: int = Field(..., description="Pets por página")
 
 #-----------MOSTRA A DOCUMENTAÇÃO DA API 
 @app.get('/', tags=[home_tag])
@@ -125,15 +129,15 @@ def get_all_pets():
         print(pets)
         return apresenta_pets(pets), 200
     
-#-----------RETORNA TODOS OS PETS CADASTRADOS (PAGINAÇÃO)
+#-----------RETORNA TODOS OS PETS CADASTRADOS (COM PAGINAÇÃO)
 @app.get('/pets/pages', tags=[pet_tag], responses={"200": ListagemPetsSchema, "404": ErrorSchema})
-def get_all_pets_paging():
+def get_all_pets_paging(query:PageQuery):
     """Faz a busca por todos os Pets cadastrados com paginação
 
     Retorna uma representação da listagem de Pets.
     """
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
+    page = query.page
+    per_page = query.per_page
 
     logger.debug(f"Coletando Pets ")
 
@@ -165,7 +169,6 @@ def get_all_pets_paging():
             "total_pages": math.ceil(total_pets / per_page),
             "pets": apresenta_pets(pets),
         }), 200
-
 
 
 #-----------RETORNA DADOS DO PET PELO ID, VER class PetPath ACIMA (bizarro)
@@ -215,5 +218,3 @@ def del_pet_id(path: PetPath):
         error_msg = "Pet não encontrado na base :/"
         logger.warning(f"Erro ao deletar pet #'{path.pet_id}', {error_msg}")
         return {"mesage": error_msg}, 404
-
-
